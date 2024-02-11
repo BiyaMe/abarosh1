@@ -22,6 +22,7 @@ class Boundary{
 }
 
 class Pacman {
+    static speed = 3
     constructor({position,velocity}){
         this.position = position
         this.velocity = velocity
@@ -29,6 +30,7 @@ class Pacman {
         this.radians = 0.75
         this.openRate = 0.12
         this.rotation = 0
+        this.speed = 3
     }
     draw(){
         context.save()
@@ -55,20 +57,20 @@ class Pacman {
 }
 
 class Ghost {
-    static speed = 2.5
+    static speed = 3
     constructor({position,velocity, color = "red"}){
         this.position = position
         this.velocity = velocity
         this.radius = 10
         this.color = color
         this.prevCollisions = []
-        this.speed = 2.5
-        this.scared = false
+        this.speed = 3
+        this.chaser = false
     }
     draw(){
         context.beginPath()
         context.arc(this.position.x,this.position.y,this.radius,0,Math.PI*2)
-        context.fillStyle = this.scared ? 'blue' : this.color
+        context.fillStyle = this.chaser ? 'red' : this.color
         context.fill()
         context.closePath()
     }
@@ -118,7 +120,8 @@ const ghosts = [
         velocity:{
             x: Ghost.speed,
             y: 0
-        }
+        },
+        color: "green"
     } ),
     new Ghost({
         position:{
@@ -129,7 +132,7 @@ const ghosts = [
             x: Ghost.speed,
             y: 0
         },
-        color: "pink"
+        color: "green"
     } ),
     new Ghost({
         position:{
@@ -151,7 +154,7 @@ const ghosts = [
             x: Ghost.speed,
             y: 0
         },
-        color: "orange"
+        color: "green"
     } )
 ]
 const pacman = new Pacman({
@@ -160,7 +163,7 @@ const pacman = new Pacman({
         y: Boundary.height + Boundary.height / 2
     },
     velocity:{
-        x: 0,
+        x: Pacman.speed,
         y: 0
     }
 })
@@ -174,13 +177,14 @@ const keys = {
 
 let lastKey = ''
 let score = 0
+let number_of_ghosts = 0
 
 const map = [
     ['-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'],
     ['-','.','.','.','.','.','.','.','.','-','.','.','.','.','.','.','.','.','-'],
     ['-','.','-','-','.','-','-','-','.','-','.','-','-','-','.','-','-','.','-'],
     ['-','.','-','-','.','-','-','-','.','-','.','-','-','-','.','-','-','.','-'],
-    ['-','.','.','.','.','.','.','.','.','.','.','.','.','p','.','.','.','.','-'],
+    ['-','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','-'],
     ['-','.','-','-','.','-','.','-','-','-','-','-','.','-','.','-','-','.','-'],
     ['-','.','.','.','.','-','.','.','.','-','.','.','.','-','.','.','.','.','-'],
     ['-','.','-','-','.','-','-','-','.','-','.','-','-','-','.','-','-','.','-'],
@@ -188,7 +192,7 @@ const map = [
     ['-','.','-','-','.','-','.','-','-','-','-','-','.','-','.','-','-','.','-'],
     ['-','.','.','.','.','.','.','-',' ',' ',' ','-','.','.','.','.','.','.','-'],
     ['-','.','-','-','.','-','.','-','-','-','-','-','.','-','.','-','-','.','-'],
-    ['-','.','p','-','.','-','.','.','.','.','.','.','.','-','.','-','.','.','-'],
+    ['-','.','.','-','.','-','.','.','.','.','.','.','.','-','.','-','.','.','-'],
     ['-','.','-','-','.','-','.','-','-','-','-','-','.','-','.','-','-','.','-'],
     ['-','.','.','.','.','.','.','.','.','-','.','.','.','.','.','.','.','.','-'],
     ['-','.','-','-','.','-','-','-','.','-','.','-','-','-','.','-','-','.','-'],
@@ -224,16 +228,16 @@ map.forEach((row, i) => {
                     })
                 )
                 break
-            case 'p':
-            powerUps.push(
-                new PowerUp({
-                    position:{
-                        x: Boundary.width * j + Boundary.width / 2,
-                        y: Boundary.height * i + Boundary.height / 2
-                    }
-                })
-            )
-            break
+            // case 'p':
+            // powerUps.push(
+            //     new PowerUp({
+            //         position:{
+            //             x: Boundary.width * j + Boundary.width / 2,
+            //             y: Boundary.height * i + Boundary.height / 2
+            //         }
+            //     })
+            // )
+            // break
         }
     })
 })
@@ -260,7 +264,7 @@ function animate(){
                         ...pacman,
                         velocity: {
                             x: 0,
-                            y: -5
+                            y: -Pacman.speed
                         }
                     },
                     rectangle: boundary
@@ -269,7 +273,7 @@ function animate(){
                 pacman.velocity.y = 0
                 break
             }   else{
-                pacman.velocity.y = -5
+                pacman.velocity.y = -Pacman.speed
             }
         }
     } else if (keys.ArrowDown && lastKey === 'ArrowDown'){
@@ -281,7 +285,7 @@ function animate(){
                         ...pacman,
                         velocity: {
                             x: 0,
-                            y: 5}
+                            y: Pacman.speed}
                     },
                     rectangle: boundary
                 })
@@ -289,7 +293,7 @@ function animate(){
                 pacman.velocity.y = 0
                 break
             }   else{
-                pacman.velocity.y = 5
+                pacman.velocity.y = Pacman.speed
             }
         }
     } else if (keys.ArrowLeft && lastKey === 'ArrowLeft'){
@@ -300,7 +304,7 @@ function animate(){
                     circle: {
                         ...pacman,
                         velocity: {
-                            x: -5,
+                            x: -Pacman.speed,
                             y: 0}
                     },
                     rectangle: boundary
@@ -309,7 +313,7 @@ function animate(){
                 pacman.velocity.x = 0
                 break
             }   else{
-                pacman.velocity.x = -5
+                pacman.velocity.x = -Pacman.speed
             }
         }
     } else if (keys.ArrowRight && lastKey === 'ArrowRight'){
@@ -320,7 +324,7 @@ function animate(){
                     circle: {
                         ...pacman,
                         velocity: {
-                            x: 5,
+                            x: Pacman.speed,
                             y: 0}
                     },
                     rectangle: boundary
@@ -329,7 +333,7 @@ function animate(){
                 pacman.velocity.x = 0
                 break
             }   else{
-                pacman.velocity.x =  5
+                pacman.velocity.x =  Pacman.speed
             }
         }
     }
@@ -341,10 +345,16 @@ function animate(){
                 ghost.position.y - pacman.position.y
             ) < pacman.radius + ghost.radius
         ) {
-            if (ghost.scared){
-                ghosts.splice(i, 1)
-                score += 100
-                scoreEl.innerText = score
+            if (ghost.chaser == false){
+                ghost.chaser = true
+                number_of_ghosts += 1
+                ghost.position = {
+                    x: Boundary.width * 6 + Boundary.width / 2,
+                    y: Boundary.height * 20 + Boundary.height / 2
+                }
+                // ghosts.splice(i, 1)
+                // score += 100
+                // scoreEl.innerText = score
             } else {
             cancelAnimationFrame(animationId)
             alert("Game Over")}
@@ -360,21 +370,21 @@ function animate(){
         const powerUp = powerUps[i];
         powerUp.draw()
 
-        if(Math.hypot(
-            powerUp.position.x - pacman.position.x,
-            powerUp.position.y - pacman.position.y) < pacman.radius + powerUp.radius){
-            powerUps.splice(i, 1)
-            score += 50
-            scoreEl.innerText = score
+        // if(Math.hypot(
+        //     powerUp.position.x - pacman.position.x,
+        //     powerUp.position.y - pacman.position.y) < pacman.radius + powerUp.radius){
+        //     powerUps.splice(i, 1)
+        //     score += 50
+        //     scoreEl.innerText = score
 
-            ghosts.forEach((ghost) => {
-                ghost.scared = true
+        //     ghosts.forEach((ghost) => {
+        //         ghost.scared = true
 
-                setTimeout(() => {
-                    ghost.scared = false
-                }, 5000)
-            })
-        }
+        //         setTimeout(() => {
+        //             ghost.scared = false
+        //         }, 5000)
+        //     })
+        // }
     }
 
     for (let i = pellets.length - 1; i > 0; i--) {
@@ -383,7 +393,7 @@ function animate(){
 
         if(Math.hypot(
             pellet.position.x - pacman.position.x,
-            pellet.position.y - pacman.position.y) < pacman.radius + pellet.radius){
+            pellet.position.y - pacman.position.y) < pacman.radius + pellet.radius && number_of_ghosts == 4){
             pellets.splice(i, 1)
             score += 10
             scoreEl.innerText = score
