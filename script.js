@@ -349,7 +349,7 @@ function animate(){
                 ghost.chaser = true
                 number_of_ghosts += 1
                 ghost.position = {
-                    x: Boundary.width * 6 + Boundary.width / 2,
+                    x: Boundary.width * 10 + Boundary.width / 2,
                     y: Boundary.height * 20 + Boundary.height / 2
                 }
                 // ghosts.splice(i, 1)
