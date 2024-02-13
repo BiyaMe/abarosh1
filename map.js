@@ -75,6 +75,75 @@ class Pacman {
     }
 }
 
+function drawCircle(context, centerX, centerY, radius) {
+let x = 0;
+let y = radius;
+let d = 3 - 2 * radius;
+
+while (x <= y) {
+    plotPoints(context, centerX, centerY, x, y);
+    if (d < 0) {
+    d = d + 4 * x + 6;
+    } else {
+    d = d + 4 * (x - y) + 10;
+    y--;
+    }
+    x++;
+}
+}
+
+function plotPoints(context, centerX, centerY, x, y) {
+context.fillRect(centerX + x, centerY + y, 1, 1);
+context.fillRect(centerX - x, centerY + y, 1, 1);
+context.fillRect(centerX + x, centerY - y, 1, 1);
+context.fillRect(centerX - x, centerY - y, 1, 1);
+context.fillRect(centerX + y, centerY + x, 1, 1);
+context.fillRect(centerX - y, centerY + x, 1, 1);
+context.fillRect(centerX + y, centerY - x, 1, 1);
+context.fillRect(centerX - y, centerY - x, 1, 1);
+}
+
+function floodFill(x, y, newColor, targetColor) {
+    console.log(x, y, newColor, targetColor);
+    const stack = [];
+    const initialColor = context.getImageData(x, y, 1, 1).data;
+
+    if (
+        initialColor[0] === newColor[0] &&
+        initialColor[1] === newColor[1] &&
+        initialColor[2] === newColor[2]
+    ) {
+        return;
+    }
+
+    stack.push({ x, y });
+
+    while (stack.length) {
+        const { x, y } = stack.pop();
+        const pixel = context.getImageData(x, y, 1, 1).data;
+
+        if (
+        x >= 0 &&
+        y >= 0 &&
+        x < canvas.width &&
+        y < canvas.height &&
+        pixel[0] === targetColor[0] &&
+        pixel[1] === targetColor[1] &&
+        pixel[2] === targetColor[2] &&
+        pixel[3] === targetColor[3]
+        ) {
+        context.fillStyle = newColor;
+        context.fillRect(x, y, 1, 1);
+
+        stack.push({ x: x + 1, y });
+        stack.push({ x: x - 1, y });
+        stack.push({ x, y: y + 1 });
+        stack.push({ x, y: y - 1 });
+        }
+    }
+    }
+
+
 class Ghost {
     static speed = 3
     constructor({position,velocity, color = "red"}){
@@ -87,11 +156,14 @@ class Ghost {
         this.chaser = false
     }
     draw(){
+        // drawCircle(context, this.position.x,this.position.y,this.radius);
+        // const initialColor = context.getImageData(this.position.x,this.position.y, 1, 1).data;
+        // const fill_color = this.chaser ? 'red' : this.color
+        // floodFill(this.position.x, this.position.y, fill_color, initialColor)
         context.beginPath()
         context.arc(this.position.x,this.position.y,this.radius,0,Math.PI*2)
         context.fillStyle = this.chaser ? 'red' : this.color
         context.fill()
-        context.closePath()
     }
     update(){
         this.draw()
