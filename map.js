@@ -301,16 +301,6 @@ map.forEach((row, i) => {
                     })
                 )
                 break
-            // case 'p':
-            // powerUps.push(
-            //     new PowerUp({
-            //         position:{
-            //             x: Boundary.width * j + Boundary.width / 2,
-            //             y: Boundary.height * i + Boundary.height / 2
-            //         }
-            //     })
-            // )
-            // break
         }
     })
 })
@@ -466,7 +456,7 @@ function animate(){
 
         if(Math.hypot(
             pellet.position.x - pacman.position.x,
-            pellet.position.y - pacman.position.y) < pacman.radius + pellet.radius && number_of_ghosts >= 4){
+            pellet.position.y - pacman.position.y) < pacman.radius + pellet.radius && number_of_ghosts == ghosts.length){
             pellets.splice(i, 1)
             score += 10
             scoreEl.innerText = score
